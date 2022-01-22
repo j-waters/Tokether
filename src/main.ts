@@ -3,4 +3,7 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 
-createApp(App).use(router).mount("#app");
+import "@/style.scss";
+import { createPinia } from "pinia";
+
+createApp(App).use(createPinia()).use(router).mount("#app");
