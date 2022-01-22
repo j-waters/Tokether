@@ -1,1 +1,13 @@
-@import '~bulma/sass';
+@import '~bulma';
+
+.is-gap-1 {
+  gap: 1rem;
+}
+
+.is-fit-content {
+  width: fit-content;
+}
+
+.is-fh {
+  height: 100%;
+}
