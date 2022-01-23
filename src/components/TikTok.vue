@@ -2,7 +2,7 @@
   <div class="is-flex-grow-1">
     <div class="tiktok-wrapper">
       <iframe
-        src="https://www.tiktok.com/embed/7024976493956615429?autoplay=1"
+        :src="embedUrl"
         allowfullscreen
         scrolling="no"
         allow="autoplay; encrypted-media;"
@@ -12,7 +12,14 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{ url: string }>();
+import { TikTokVideo } from "@/helpers/tiktok";
+import { computed } from "vue";
+
+const props = defineProps<{ videoId: string }>();
+
+const embedUrl = computed(
+  () => `https://www.tiktok.com/embed/${props.videoId}`
+);
 </script>
 
 <style lang="scss" scoped>

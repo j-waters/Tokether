@@ -31,8 +31,14 @@
 import TikTok from "@/components/TikTok.vue";
 import Player from "@/components/Player.vue";
 import Playlist from "@/components/Playlist.vue";
+import { db } from "@/helpers/database";
+import { useRoomStore } from "@/store/room";
 
 const props = defineProps<{ id: string }>();
+
+const roomStore = useRoomStore();
+
+roomStore.loadRoom(props.id);
 </script>
 
 <style lang="scss" scoped></style>
