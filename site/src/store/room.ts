@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
-import { useRouter } from "vue-router";
-import { getVideoInfo, TikTokVideo } from "@/helpers/tiktok";
+import { getVideoInfo, TikTokVideo } from "@tokether/common";
 import { db } from "@/helpers/database";
 import router from "@/router";
 
@@ -64,7 +63,6 @@ export const useRoomStore = defineStore("room", {
       const room = db.get(`rooms/${roomId}`);
       room.open!((data) => {
         this.playlist = Object.values(data.playlist);
-        console.log("!!!!", data);
         this.playlistIndex = data.playlistIndex;
       });
     },

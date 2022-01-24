@@ -12,14 +12,12 @@
 </template>
 
 <script lang="ts" setup>
-import { TikTokVideo } from "@/helpers/tiktok";
+import { getEmbedUrl, TikTokVideo } from "@tokether/common/lib/tiktok";
 import { computed } from "vue";
 
 const props = defineProps<{ videoId: string }>();
 
-const embedUrl = computed(
-  () => `https://www.tiktok.com/embed/${props.videoId}`
-);
+const embedUrl = computed(() => getEmbedUrl(props.videoId));
 </script>
 
 <style lang="scss" scoped>
