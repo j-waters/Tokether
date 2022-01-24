@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { getVideoInfo, TikTokVideo } from "@tokether/common";
 import { db } from "@/helpers/database";
 import router from "@/router";
+import { IGunChainReference } from "gun/types/chain";
 
 function generateId(len: number): string {
   const arr = new Uint8Array(len / 2);
@@ -35,9 +36,8 @@ export const useRoomStore = defineStore("room", {
     } as RoomState),
   actions: {
     async addVideos(urls: string[]) {
-      const playlist = db.get(`rooms/${this.roomId}`).get("playlist");
+      const playlist = this.gunRoom.get("playlist");
       for (const url of urls) {
-        console.log("process", url);
         if (url == "") continue;
         const info = await getVideoInfo(url);
         playlist.set({
@@ -66,7 +66,7 @@ export const useRoomStore = defineStore("room", {
       } else if (playlistIndex < 0) {
         playlistIndex = 0;
       }
-      db.get(`rooms/${this.roomId}`).put({ playlistIndex });
+      this.gunRoom.put({ playlistIndex });
     },
 
     async nextVideo() {
@@ -107,6 +107,9 @@ export const useRoomStore = defineStore("room", {
       ]
         .map((index) => this.enhancedPlaylist[index])
         .filter((value) => value && value.videoId);
+    },
+    gunRoom(): IGunChainReference {
+      return db.get(`rooms/${this.roomId}`);
     },
   },
 });

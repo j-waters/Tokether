@@ -29,7 +29,7 @@ export async function getVideoInfo(url: string) {
 }
 
 export function getVideoId(url: string) {
-  return url.match(/video\/(\d*)/)![1];
+  return url.match(/(?:video|embed)\/(\d*)/)![1];
 }
 
 export function getVideoAuthor(url: string) {

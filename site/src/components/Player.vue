@@ -7,6 +7,7 @@
           :video-id="item.videoId"
           :key="item.itemId"
           v-show="item.isCurrent"
+          :class="{ 'current-iframe': item.isCurrent }"
         />
       </div>
       <div class="buttons" style="width: 100%">
@@ -31,8 +32,12 @@
 <script lang="ts" setup>
 import TikTok from "@/components/TikTok.vue";
 import { useRoomStore } from "@/store/room";
+import { usePlayerStore } from "@/store/player";
 
 const roomStore = useRoomStore();
+
+const playerStore = usePlayerStore();
+playerStore.init();
 </script>
 
 <style scoped></style>

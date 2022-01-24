@@ -63,10 +63,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       );
       chrome.runtime.sendMessage({ type: "updateVideos", videos });
       break;
-    case "bounce":
-      chrome.tabs.sendMessage(sender.tab!.id!, message.message);
-      break;
+    // case "bounce":
+    //   chrome.tabs.sendMessage(sender.tab!.id!, message.message);
+    //   break;
   }
 });
-
-getUrlFromId("7056117601327598895");
