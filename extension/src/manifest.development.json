@@ -16,14 +16,28 @@
 		"webRequest"
 	],
 	"host_permissions": [
-		"*://*.tiktok.com/*"
+		"*://*.tiktok.com/*", "http://localhost/*"
 	],
 	"content_scripts": [
 		{
 			"matches": [
+				"http://localhost/*"
+			],
+			"js": ["/js/content-tokether.js"]
+		},
+		{
+			"matches": [
 				"*://*.tiktok.com/*"
 			],
-			"js": ["/js/content.js"]
+			"js": ["/js/content-tiktok.js"]
+		},
+		{
+			"matches": [
+				"*://*.tiktok.com/embed/*"
+			],
+			"js": ["/js/content-tiktokEmbed.js"],
+			"all_frames": true,
+			"match_about_blank": true
 		}
 	]
 }

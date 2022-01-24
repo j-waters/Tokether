@@ -2,7 +2,9 @@ import {
   ExtensionState,
   ScrapedVideo,
   ScrapedVideoUrl,
-} from "@tokether/common/lib/types";
+} from "@tokether/common";
+
+console.log("tiktok mode");
 
 const state: ExtensionState = {
   messagesScraping: false,
@@ -51,5 +53,3 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       break;
   }
 });
-
-getAllVideos();
