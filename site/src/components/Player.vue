@@ -1,16 +1,14 @@
 <template>
   <div class="box is-fh">
     <div class="is-flex is-flex-direction-column is-align-items-center is-fh">
-      <TikTok
-        :video-id="roomStore.currentVideo?.videoId"
-        :key="roomStore.currentVideo?.videoId"
-      />
-      <!--      <TikTok-->
-      <!--        :video-id="preloading.videoId"-->
-      <!--        v-for="preloading in roomStore.preloadVideos"-->
-      <!--        :key="preloading.videoId"-->
-      <!--        v-show="false"-->
-      <!--      />-->
+      <div class="is-flex">
+        <TikTok
+          v-for="item in roomStore.loadedVideos"
+          :video-id="item.video.videoId"
+          :key="item.video.videoId"
+          v-show="item.isCurrent"
+        />
+      </div>
       <div class="buttons" style="width: 100%">
         <button
           class="button is-primary is-flex-grow-1"

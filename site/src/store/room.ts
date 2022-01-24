@@ -13,6 +13,11 @@ export interface PlaylistItem {
   video: TikTokVideo;
 }
 
+export interface EnhancedPlaylistItem extends PlaylistItem {
+  index: number;
+  isCurrent: boolean;
+}
+
 interface RoomState {
   playlist: PlaylistItem[];
   roomId: string | null;
@@ -75,14 +80,19 @@ export const useRoomStore = defineStore("room", {
     currentVideo(): TikTokVideo | null {
       return this.playlist[this.playlistIndex]?.video;
     },
-    preloadVideos(): TikTokVideo[] {
+    loadedVideos(): EnhancedPlaylistItem[] {
       return [
         this.playlistIndex - 1,
+        this.playlistIndex,
         this.playlistIndex + 1,
         this.playlistIndex + 2,
       ]
-        .map((index) => this.playlist[index]?.video)
-        .filter((value) => value);
+        .map((index) => ({
+          ...this.playlist[index],
+          index,
+          isCurrent: index == this.playlistIndex,
+        }))
+        .filter((value) => value.video);
     },
   },
 });
