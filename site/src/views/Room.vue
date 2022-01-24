@@ -14,8 +14,8 @@
     <!-- Hero content: will be in the middle -->
     <div class="hero-body is-align-items-stretch">
       <div class="container has-text-centered">
-        <div class="columns is-fh">
-          <div class="column is-fh is-8">
+        <div class="columns is-fh is-multiline">
+          <div class="column is-fh is-6">
             <Player />
           </div>
           <div

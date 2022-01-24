@@ -3,12 +3,9 @@ import { getVideoInfo, TikTokVideo } from "@tokether/common";
 import { db } from "@/helpers/database";
 import router from "@/router";
 import { IGunChainReference } from "gun/types/chain";
-
-function generateId(len: number): string {
-  const arr = new Uint8Array(len / 2);
-  window.crypto.getRandomValues(arr);
-  return Array.from(arr, (dec) => dec.toString(16).padStart(2, "0")).join("");
-}
+import { usePlayerStore } from "@/store/player";
+import { generateId } from "@/helpers/generate";
+import { useUsersStore } from "@/store/users";
 
 export interface PlaylistItem {
   video: TikTokVideo;
@@ -25,6 +22,7 @@ interface RoomState {
   playlist: PlaylistItem[];
   roomId: string | null;
   playlistIndex: number;
+  userId: string;
 }
 
 export const useRoomStore = defineStore("room", {
@@ -33,10 +31,11 @@ export const useRoomStore = defineStore("room", {
       playlist: [] as PlaylistItem[],
       roomId: null,
       playlistIndex: 0,
+      userId: generateId(32),
     } as RoomState),
   actions: {
     async addVideos(urls: string[]) {
-      const playlist = this.gunRoom.get("playlist");
+      const playlist = this.gunRoomState.get("playlist");
       for (const url of urls) {
         if (url == "") continue;
         const info = await getVideoInfo(url);
@@ -66,7 +65,7 @@ export const useRoomStore = defineStore("room", {
       } else if (playlistIndex < 0) {
         playlistIndex = 0;
       }
-      this.gunRoom.put({ playlistIndex });
+      this.gunRoomState.put({ playlistIndex });
     },
 
     async nextVideo() {
@@ -78,16 +77,33 @@ export const useRoomStore = defineStore("room", {
 
     async loadRoom(roomId: string) {
       this.roomId = roomId;
-      const room = db.get(`rooms/${roomId}`);
-      room.open!((data) => {
+
+      const userStore = useUsersStore();
+      userStore.init();
+
+      this.gunRoomState.open!((data) => {
+        const currentVideoId = this.currentVideo?.videoId;
+        const currentPlaylistIndex = this.playlistIndex;
         this.playlist = Object.values(data.playlist);
         this.playlistIndex = data.playlistIndex;
+        console.log("room update", data);
+        if (
+          this.currentVideo &&
+          (this.currentVideo.videoId != currentVideoId ||
+            this.playlistIndex != currentPlaylistIndex)
+        ) {
+          const playerStore = usePlayerStore();
+          playerStore.changedVideo(this.currentVideo.videoId);
+        }
       });
     },
   },
   getters: {
     currentVideo(): TikTokVideo | null {
       return this.playlist[this.playlistIndex]?.video;
+    },
+    currentVideoId(): string | null {
+      return this.currentVideo?.videoId ?? null;
     },
     enhancedPlaylist(): EnhancedPlaylistItem[] {
       return this.playlist.map((item, index) => ({
@@ -110,6 +126,9 @@ export const useRoomStore = defineStore("room", {
     },
     gunRoom(): IGunChainReference {
       return db.get(`rooms/${this.roomId}`);
+    },
+    gunRoomState(): IGunChainReference {
+      return this.gunRoom.get("state");
     },
   },
 });

@@ -13,11 +13,17 @@
 
 <script lang="ts" setup>
 import { getEmbedUrl, TikTokVideo } from "@tokether/common/lib/tiktok";
-import { computed } from "vue";
+import { computed, onUnmounted } from "vue";
+import { usePlayerStore } from "@/store/player";
 
 const props = defineProps<{ videoId: string }>();
 
 const embedUrl = computed(() => getEmbedUrl(props.videoId));
+
+onUnmounted(() => {
+  const playerStore = usePlayerStore();
+  playerStore.unloadVideoId(props.videoId);
+});
 </script>
 
 <style lang="scss" scoped>
