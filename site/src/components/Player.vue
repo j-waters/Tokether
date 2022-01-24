@@ -4,8 +4,8 @@
       <div class="is-flex">
         <TikTok
           v-for="item in roomStore.loadedVideos"
-          :video-id="item.video.videoId"
-          :key="item.video.videoId"
+          :video-id="item.videoId"
+          :key="item.itemId"
           v-show="item.isCurrent"
         />
       </div>

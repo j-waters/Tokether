@@ -2,17 +2,15 @@
   <div class="box is-fh is-flex is-flex-direction-column">
     <div class="is-flex-grow-1" style="overflow: auto">
       <PlaylistRow
-        v-for="(item, i) in roomStore.playlist"
-        :key="item.video.videoId"
+        v-for="item in roomStore.enhancedPlaylist"
+        :key="item.itemId"
         :item="item"
-        :index="i"
       />
     </div>
-    <div class="field has-addons mt-5">
+    <div class="field has-addons mt-5 mb-0">
       <p class="control">
         <textarea
           class="input"
-          style="resize: none"
           placeholder="Video URL"
           v-model="addingVideoUrl"
         />
@@ -21,7 +19,7 @@
         <button class="button is-primary" @click="queueVideo()">Queue</button>
       </div>
     </div>
-    <p class="help">
+    <p class="help has-text-left">
       You can also paste in a list of videos, where each one is on a new line
     </p>
   </div>
@@ -53,4 +51,9 @@ function queueVideo() {
 <style lang="scss" scoped>
 //max-height: calc(100vh - 1.5rem - 52px - 3rem);
 //overflow-y: auto;
+textarea {
+  overflow: hidden;
+  resize: none;
+  white-space: pre;
+}
 </style>

@@ -16,6 +16,8 @@ export interface PlaylistItem {
 export interface EnhancedPlaylistItem extends PlaylistItem {
   index: number;
   isCurrent: boolean;
+  videoId: string;
+  itemId: string;
 }
 
 interface RoomState {
@@ -35,6 +37,8 @@ export const useRoomStore = defineStore("room", {
     async addVideos(urls: string[]) {
       const playlist = db.get(`rooms/${this.roomId}`).get("playlist");
       for (const url of urls) {
+        console.log("process", url);
+        if (url == "") continue;
         const info = await getVideoInfo(url);
         playlist.set({
           video: info,
@@ -85,6 +89,15 @@ export const useRoomStore = defineStore("room", {
     currentVideo(): TikTokVideo | null {
       return this.playlist[this.playlistIndex]?.video;
     },
+    enhancedPlaylist(): EnhancedPlaylistItem[] {
+      return this.playlist.map((item, index) => ({
+        ...item,
+        index,
+        isCurrent: index == this.playlistIndex,
+        videoId: item.video.videoId,
+        itemId: `${index}|${item.video.videoId}`,
+      }));
+    },
     loadedVideos(): EnhancedPlaylistItem[] {
       return [
         this.playlistIndex - 1,
@@ -92,12 +105,8 @@ export const useRoomStore = defineStore("room", {
         this.playlistIndex + 1,
         this.playlistIndex + 2,
       ]
-        .map((index) => ({
-          ...this.playlist[index],
-          index,
-          isCurrent: index == this.playlistIndex,
-        }))
-        .filter((value) => value.video);
+        .map((index) => this.enhancedPlaylist[index])
+        .filter((value) => value && value.videoId);
     },
   },
 });

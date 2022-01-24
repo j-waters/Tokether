@@ -4,8 +4,8 @@
   >
     <div
       class="video-title is-clickable"
-      :class="{ 'has-text-weight-bold': index === roomStore.playlistIndex }"
-      @click="roomStore.setPlaylistIndex(index)"
+      :class="{ 'has-text-weight-bold': item.isCurrent }"
+      @click="roomStore.setPlaylistIndex(item.index)"
     >
       <span class="has-text-grey">@{{ item.video.author_name }}</span>
       {{ item.video.title }}
@@ -15,12 +15,12 @@
 </template>
 
 <script lang="ts" setup>
-import { PlaylistItem, useRoomStore } from "@/store/room";
+import { EnhancedPlaylistItem, PlaylistItem, useRoomStore } from "@/store/room";
 import { computed } from "vue";
 
 const roomStore = useRoomStore();
 
-const props = defineProps<{ item: PlaylistItem; index: number }>();
+const props = defineProps<{ item: EnhancedPlaylistItem }>();
 </script>
 
 <style scoped>
