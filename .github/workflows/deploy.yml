@@ -8,9 +8,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./site
     steps:
       - uses: actions/checkout@v2
-      - run: cd site
       - run: yarn
       - run: yarn lint
       - run: yarn build
