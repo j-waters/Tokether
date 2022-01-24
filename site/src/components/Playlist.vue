@@ -1,42 +1,48 @@
 <template>
   <div class="box is-fh is-flex is-flex-direction-column">
-    <div class="is-flex-grow-1">
-      <div v-for="(item, i) in roomStore.playlist" :key="item.video.videoId">
-        <div class="is-flex is-gap-1 is-align-items-center">
-          <div
-            class="video-title"
-            :class="{ 'has-text-weight-bold': i === roomStore.playlistIndex }"
-          >
-            {{ item.video.title }}
-          </div>
-          <button class="button">Cancel</button>
-        </div>
-      </div>
+    <div class="is-flex-grow-1" style="overflow: auto">
+      <PlaylistRow
+        v-for="(item, i) in roomStore.playlist"
+        :key="item.video.videoId"
+        :item="item"
+        :index="i"
+      />
     </div>
-    <div class="field has-addons">
+    <div class="field has-addons mt-5">
       <p class="control">
-        <input class="input" placeholder="Video URL" v-model="addingVideoUrl" />
+        <textarea
+          class="input"
+          style="resize: none"
+          placeholder="Video URL"
+          v-model="addingVideoUrl"
+        />
       </p>
       <div class="control">
-        <button
-          class="button is-primary"
-          @click="queueVideo()"
-          @keyup.enter="queueVideo()"
-        >
-          Queue
-        </button>
+        <button class="button is-primary" @click="queueVideo()">Queue</button>
       </div>
     </div>
+    <p class="help">
+      You can also paste in a list of videos, where each one is on a new line
+    </p>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useRoomStore } from "@/store/room";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import PlaylistRow from "@/components/PlaylistRow.vue";
 
+//@keyup.enter="queueVideo()"
 const roomStore = useRoomStore();
 
 const addingVideoUrl = ref("");
+
+watch(addingVideoUrl, (value) => {
+  if (value.includes("\n")) {
+    roomStore.addVideos(value.split("\n"));
+    addingVideoUrl.value = "";
+  }
+});
 
 function queueVideo() {
   roomStore.addVideo(addingVideoUrl.value);
@@ -45,9 +51,6 @@ function queueVideo() {
 </script>
 
 <style lang="scss" scoped>
-.video-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+//max-height: calc(100vh - 1.5rem - 52px - 3rem);
+//overflow-y: auto;
 </style>

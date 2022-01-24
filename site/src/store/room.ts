@@ -27,13 +27,17 @@ export const useRoomStore = defineStore("room", {
       playlistIndex: 0,
     } as RoomState),
   actions: {
-    async addVideo(url: string) {
-      const info = await getVideoInfo(url);
-      db.get(`rooms/${this.roomId}`)
-        .get("playlist")
-        .set({
+    async addVideos(urls: string[]) {
+      const playlist = db.get(`rooms/${this.roomId}`).get("playlist");
+      for (const url of urls) {
+        const info = await getVideoInfo(url);
+        playlist.set({
           video: info,
         } as PlaylistItem);
+      }
+    },
+    async addVideo(url: string) {
+      this.addVideos([url]);
     },
     async createRoom() {
       this.roomId = generateId(8);
@@ -70,6 +74,15 @@ export const useRoomStore = defineStore("room", {
   getters: {
     currentVideo(): TikTokVideo | null {
       return this.playlist[this.playlistIndex]?.video;
+    },
+    preloadVideos(): TikTokVideo[] {
+      return [
+        this.playlistIndex - 1,
+        this.playlistIndex + 1,
+        this.playlistIndex + 2,
+      ]
+        .map((index) => this.playlist[index]?.video)
+        .filter((value) => value);
     },
   },
 });

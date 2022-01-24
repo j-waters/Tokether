@@ -18,7 +18,10 @@
           <div class="column is-fh is-8">
             <Player />
           </div>
-          <div class="column is-fh is-4">
+          <div
+            class="column is-fh is-4"
+            style="height: calc(100vh - 1.5rem - 52px - 4.5rem)"
+          >
             <Playlist />
           </div>
         </div>
