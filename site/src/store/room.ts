@@ -57,6 +57,11 @@ export const useRoomStore = defineStore("room", {
     },
 
     async setPlaylistIndex(playlistIndex: number) {
+      if (playlistIndex >= this.playlist.length) {
+        playlistIndex = this.playlist.length - 1;
+      } else if (playlistIndex < 0) {
+        playlistIndex = 0;
+      }
       db.get(`rooms/${this.roomId}`).put({ playlistIndex });
     },
 
