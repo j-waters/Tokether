@@ -68,3 +68,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     //   break;
   }
 });
+
+chrome.runtime.onMessageExternal.addListener(function (
+  message,
+  sender,
+  sendResponse
+) {
+  switch (message.type) {
+    case "version":
+      sendResponse({ version: 1.0 });
+      break;
+  }
+  return true;
+});

@@ -16,15 +16,12 @@
 		"webRequest"
 	],
 	"host_permissions": [
-		"*://*.tiktok.com/*", "*://*/*"
+		"*://*.tiktok.com/*"
 	],
+	"externally_connectable": {
+		"matches": ["*://localhost/*"]
+	},
 	"content_scripts": [
-		{
-			"matches": [
-				"*://*/*"
-			],
-			"js": ["/js/content-tokether.js"]
-		},
 		{
 			"matches": [
 				"*://*.tiktok.com/*"

@@ -8,6 +8,8 @@ interface GlobalState {
 
 const INTERACTION_EVENTS: (keyof WindowEventMap)[] = ["scroll", "click"];
 
+const EXTENSION_ID = "lphfloofohjpcjokijgimadbllfckcjb";
+
 export const useGlobalStore = defineStore("global", {
   state: () =>
     ({
@@ -19,25 +21,15 @@ export const useGlobalStore = defineStore("global", {
       INTERACTION_EVENTS.forEach((event) =>
         window.addEventListener(event, this.onInteraction)
       );
-      window.addEventListener("message", this.onMessage, false);
+      chrome.runtime.sendMessage(EXTENSION_ID, { type: "version" }, () => {
+        this.hasExtension = chrome.runtime.lastError == undefined;
+      });
     },
     onInteraction() {
       this.hasInteracted = true;
       INTERACTION_EVENTS.forEach((event) =>
         window.removeEventListener(event, this.onInteraction)
       );
-    },
-    onMessage(event: MessageEvent) {
-      if (!messagedAllowedFromWindow(event)) {
-        return;
-      }
-
-      switch (event.data.type) {
-        case "hasExtension":
-          console.log("has extension");
-          this.hasExtension = true;
-          break;
-      }
     },
   },
 });
