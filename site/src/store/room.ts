@@ -29,7 +29,6 @@ interface RoomSharedState {
 
 interface RoomState extends RoomSharedState {
   roomId: string | null;
-  userId: string;
 }
 
 export const useRoomStore = defineStore("room", {
@@ -38,7 +37,6 @@ export const useRoomStore = defineStore("room", {
       playlist: [] as PlaylistItem[],
       roomId: null,
       playlistIndex: 0,
-      userId: generateId(32),
     } as RoomState),
   actions: {
     async leave() {
@@ -62,7 +60,7 @@ export const useRoomStore = defineStore("room", {
       this.addVideos([url]);
     },
     async createRoom() {
-      this.roomId = generateId(8);
+      this.roomId = generateId(4);
       this.addVideos([
         "https://www.tiktok.com/@hardlyhardin/video/7051714436142255366",
         "https://www.tiktok.com/@aketton/video/7053481619449040134",

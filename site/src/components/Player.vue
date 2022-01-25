@@ -1,28 +1,26 @@
 <template>
-  <div class="box is-fh">
-    <div class="is-flex is-flex-direction-column is-align-items-center is-fh">
-      <TikTok
-        v-for="item in roomStore.loadedVideos"
-        :video-id="item.videoId"
-        :key="item.itemId"
-        v-show="item.isCurrent"
-        :class="{ 'current-iframe': item.isCurrent }"
-      />
-      <div class="buttons" style="width: 100%">
-        <button
-          class="button is-primary is-flex-grow-1"
-          @click="roomStore.prevVideo()"
-        >
-          Prev
-        </button>
-        <button
-          class="button is-primary is-flex-grow-1"
-          @click="roomStore.nextVideo()"
-          @keyup.right="roomStore.nextVideo()"
-        >
-          Next
-        </button>
-      </div>
+  <div class="is-flex is-flex-direction-column is-align-items-center is-fh">
+    <TikTok
+      v-for="item in roomStore.loadedVideos"
+      :video-id="item.videoId"
+      :key="item.itemId"
+      v-show="item.isCurrent"
+      :class="{ 'current-iframe': item.isCurrent }"
+    />
+    <div class="buttons" style="width: 100%">
+      <button
+        class="button is-primary is-flex-grow-1"
+        @click="roomStore.prevVideo()"
+      >
+        Prev
+      </button>
+      <button
+        class="button is-primary is-flex-grow-1"
+        @click="roomStore.nextVideo()"
+        @keyup.right="roomStore.nextVideo()"
+      >
+        Next
+      </button>
     </div>
   </div>
 </template>

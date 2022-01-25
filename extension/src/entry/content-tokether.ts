@@ -1,4 +1,5 @@
 console.log("tokether mode");
+window.postMessage({ type: "hasExtension" }, "*");
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   // switch (message.type) {
   //   case "loaded":

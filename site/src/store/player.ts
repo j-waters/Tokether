@@ -2,7 +2,10 @@ import { defineStore } from "pinia";
 import { useRoomStore } from "@/store/room";
 import { IGunChainReference } from "gun/types/chain";
 import { useUsersStore } from "@/store/users";
-import { watch } from "vue";
+import { computed, watch } from "vue";
+import { useGlobalStore } from "@/store/global";
+import { waitForTrue } from "@/helpers/watchers";
+import { messageAllowedFromTikTok } from "@/helpers/messaging";
 
 interface PlayerState {
   playing: boolean;
@@ -25,19 +28,12 @@ export const usePlayerStore = defineStore("player", {
       });
     },
     onMessage(event: MessageEvent) {
-      // We only accept messages from the tiktok window
-      if (
-        event.source == null ||
-        !("parent" in event.source) ||
-        event.source.parent != window ||
-        event.origin != "https://www.tiktok.com"
-      ) {
+      if (!messageAllowedFromTikTok(event)) {
         return;
       }
 
       switch (event.data.type) {
         case "loaded":
-          console.log("recv loaded", event.data.videoId);
           this.loaded.push(event.data.videoId);
           break;
         case "embedSetPlaying":
@@ -50,24 +46,24 @@ export const usePlayerStore = defineStore("player", {
       this.gunPlayer.off();
       this.$reset();
     },
-    setIframePlaying(playing: boolean) {
-      const curIframe: HTMLIFrameElement | null = document.querySelector(
-        ".current-iframe iframe"
-      );
+    setIframePlaying(playing: boolean, iframe?: HTMLIFrameElement | null) {
+      const globalStore = useGlobalStore();
+      if (!globalStore.hasInteracted) {
+        return;
+      }
+      if (iframe == undefined) {
+        iframe = document.querySelector(
+          ".current-iframe iframe"
+        ) as HTMLIFrameElement;
+      }
       const iframeWindow: WindowProxy | null | undefined =
-        curIframe?.contentWindow;
+        iframe?.contentWindow;
       iframeWindow?.postMessage({ type: "parentSetPlaying", playing }, "*");
     },
     setAllIframesPlaying(playing: boolean) {
-      document.querySelectorAll("iframe").forEach((iframe) =>
-        iframe.contentWindow?.postMessage(
-          {
-            type: "parentSetPlaying",
-            playing,
-          },
-          "*"
-        )
-      );
+      document
+        .querySelectorAll("iframe")
+        .forEach((iframe) => this.setIframePlaying(playing, iframe));
     },
     setPlaying(playing: boolean) {
       this.gunPlayer.put({ playing });
@@ -75,44 +71,22 @@ export const usePlayerStore = defineStore("player", {
     unloadVideoId(videoId: string) {
       this.loaded = this.loaded.filter((l) => l != videoId);
     },
-    changedVideo(videoId: string) {
+    async changedVideo(videoId: string) {
       console.log("changed video");
       this.setAllIframesPlaying(false);
 
-      const _whenLoaded = () => {
-        console.log("video is loaded");
-        const usersStore = useUsersStore();
-        usersStore.setLoaded(videoId);
-        if (usersStore.allLoaded) {
-          this.setPlaying(true);
-        } else {
-          const stopWatchingUsers = watch(
-            () => usersStore.allLoaded,
-            (allUsersLoaded) => {
-              if (allUsersLoaded) {
-                this.setPlaying(true);
-                stopWatchingUsers();
-              }
-            }
-          );
-        }
-      };
+      const globalStore = useGlobalStore();
 
-      if (this.loaded.includes(videoId)) {
-        console.log("already loaded");
-        _whenLoaded();
-      } else {
-        console.log("not loaded");
-        const stopWatchingLoaded = watch(
-          () => this.loaded.includes(videoId),
-          (loadedIncludesId) => {
-            if (loadedIncludesId) {
-              _whenLoaded();
-            }
-            stopWatchingLoaded();
-          }
-        );
-      }
+      await waitForTrue(
+        () => this.loaded.includes(videoId) && globalStore.hasInteracted
+      );
+
+      const usersStore = useUsersStore();
+      usersStore.setLoaded(videoId);
+
+      await waitForTrue(() => usersStore.allLoaded);
+
+      this.setPlaying(true);
     },
   },
   getters: {

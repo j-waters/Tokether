@@ -1,11 +1,7 @@
 <template>
-  <div class="box is-fh is-flex is-flex-direction-column">
+  <div class="is-flex is-flex-direction-column is-fh">
     <div class="is-flex-grow-1" style="overflow: auto">
-      <PlaylistRow
-        v-for="item in roomStore.enhancedPlaylist"
-        :key="item.itemId"
-        :item="item"
-      />
+      <PlaylistRow v-for="item in playlist" :key="item.itemId" :item="item" />
     </div>
     <p class="help has-text-left mt-5 mb-1">
       You can also paste in a list of videos, where each one is on a new line
@@ -32,6 +28,12 @@ import PlaylistRow from "@/components/PlaylistRow.vue";
 
 //@keyup.enter="queueVideo()"
 const roomStore = useRoomStore();
+
+const playlist = computed(() => roomStore.enhancedPlaylist, {
+  onTrigger() {
+    console.log("chage playlist");
+  },
+});
 
 const addingVideoUrl = ref("");
 

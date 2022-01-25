@@ -13,24 +13,28 @@ interface UserState {
 export interface User {
   lastUpdate: string;
   loaded?: string;
+  name: string;
 }
 
 export const useUsersStore = defineStore("users", {
   state: () =>
     ({
-      userId: generateId(32),
+      userId: generateId(16),
       users: [],
     } as UserState),
   actions: {
     init() {
-      this.intervalId = setInterval(() => this.heartbeat(), 5000);
+      this.intervalId = setInterval(() => this.heartbeat(), 3500);
+      this.heartbeat();
       this.gunUsers.open!((data) => {
         this.users = Object.values(data);
-        console.log("USERSSS", this.activeUsers);
       });
     },
     heartbeat() {
-      this.gunUser.put({ lastUpdate: new Date().toString() });
+      this.gunUser.put({
+        lastUpdate: new Date().toString(),
+        name: `User${this.userId}`,
+      });
     },
     setLoaded(videoId: string) {
       this.gunUser.put({ loaded: videoId });

@@ -7,16 +7,32 @@
 
     <!-- Hero content: will be in the middle -->
     <div class="hero-body is-align-items-stretch" style="overflow: hidden">
-      <div class="container is-fh">
-        <div class="columns is-multiline is-fh">
-          <div class="column is-8">
+      <div class="tile is-ancestor is-fh">
+        <div class="tile is-parent">
+          <div class="tile is-child box">
             <Player />
           </div>
-          <div class="column is-4">
+        </div>
+        <div class="tile is-4 is-vertical is-parent">
+          <div class="tile is-child box">
+            <UserList />
+          </div>
+          <div
+            class="tile is-child box is-flex-grow-3"
+            style="overflow: hidden"
+          >
             <Playlist />
           </div>
         </div>
       </div>
+      <!--        <div class="columns is-multiline is-fh">-->
+      <!--          <div class="column is-8">-->
+      <!--            <Player />-->
+      <!--          </div>-->
+      <!--          <div class="column is-4">-->
+      <!--            <Playlist />-->
+      <!--          </div>-->
+      <!--        </div>-->
     </div>
   </section>
 </template>
@@ -29,6 +45,7 @@ import { db } from "@/helpers/database";
 import { useRoomStore } from "@/store/room";
 import Navbar from "@/components/Navbar.vue";
 import { onUnmounted } from "vue";
+import UserList from "@/components/UserList.vue";
 
 const props = defineProps<{ id: string }>();
 
