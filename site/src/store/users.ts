@@ -7,6 +7,7 @@ import { differenceInSeconds } from "date-fns";
 interface UserState {
   userId: string;
   users: User[];
+  intervalId?: number;
 }
 
 export interface User {
@@ -22,7 +23,7 @@ export const useUsersStore = defineStore("users", {
     } as UserState),
   actions: {
     init() {
-      setInterval(() => this.heartbeat(), 5000);
+      this.intervalId = setInterval(() => this.heartbeat(), 5000);
       this.gunUsers.open!((data) => {
         this.users = Object.values(data);
         console.log("USERSSS", this.activeUsers);
@@ -33,6 +34,10 @@ export const useUsersStore = defineStore("users", {
     },
     setLoaded(videoId: string) {
       this.gunUser.put({ loaded: videoId });
+    },
+    leave() {
+      clearInterval(this.intervalId);
+      this.gunUsers.off();
     },
   },
   getters: {

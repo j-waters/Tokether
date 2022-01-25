@@ -17,36 +17,38 @@ export const usePlayerStore = defineStore("player", {
     } as PlayerState),
   actions: {
     init() {
-      window.addEventListener(
-        "message",
-        (event) => {
-          // We only accept messages from the tiktok window
-          if (
-            event.source == null ||
-            !("parent" in event.source) ||
-            event.source.parent != window ||
-            event.origin != "https://www.tiktok.com"
-          ) {
-            return;
-          }
-
-          switch (event.data.type) {
-            case "loaded":
-              console.log("recv loaded", event.data.videoId);
-              this.loaded.push(event.data.videoId);
-              break;
-            case "embedSetPlaying":
-              this.setPlaying(event.data.playing);
-              break;
-          }
-        },
-        false
-      );
+      window.addEventListener("message", this.onMessage, false);
 
       this.gunPlayer.open!((data) => {
         this.playing = data.playing;
         this.setIframePlaying(this.playing);
       });
+    },
+    onMessage(event: MessageEvent) {
+      // We only accept messages from the tiktok window
+      if (
+        event.source == null ||
+        !("parent" in event.source) ||
+        event.source.parent != window ||
+        event.origin != "https://www.tiktok.com"
+      ) {
+        return;
+      }
+
+      switch (event.data.type) {
+        case "loaded":
+          console.log("recv loaded", event.data.videoId);
+          this.loaded.push(event.data.videoId);
+          break;
+        case "embedSetPlaying":
+          this.setPlaying(event.data.playing);
+          break;
+      }
+    },
+    leave() {
+      window.removeEventListener("message", this.onMessage);
+      this.gunPlayer.off();
+      this.$reset();
     },
     setIframePlaying(playing: boolean) {
       const curIframe: HTMLIFrameElement | null = document.querySelector(

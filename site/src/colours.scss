@@ -1,0 +1,24 @@
+$turquoise: #25F4EE;
+$purple: #ff00c1;
+
+@import "~bulma/sass/utilities/initial-variables";
+@import "~bulma/sass/utilities/functions";
+
+
+
+$scheme-main: $black;
+$scheme-main-bis: $black-bis;
+$scheme-main-ter: $black-ter;
+$scheme-invert: $white;
+$scheme-invert-bis: $white-bis;
+$scheme-invert-ter: $white-ter;
+
+$text: $scheme-invert-bis;
+$text-invert: findColorInvert($text);
+$text-light: $grey-lightest;
+$text-strong: $grey-lighter;
+
+
+@import "~bulma/sass/utilities/derived-variables";
+
+$box-background-color: $scheme-main-ter;

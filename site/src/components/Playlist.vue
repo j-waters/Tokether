@@ -7,8 +7,11 @@
         :item="item"
       />
     </div>
-    <div class="field has-addons mt-5 mb-0">
-      <p class="control">
+    <p class="help has-text-left mt-5 mb-1">
+      You can also paste in a list of videos, where each one is on a new line
+    </p>
+    <div class="field has-addons">
+      <p class="control" style="width: 100%">
         <textarea
           class="input"
           placeholder="Video URL"
@@ -19,9 +22,6 @@
         <button class="button is-primary" @click="queueVideo()">Queue</button>
       </div>
     </div>
-    <p class="help has-text-left">
-      You can also paste in a list of videos, where each one is on a new line
-    </p>
   </div>
 </template>
 
