@@ -25,15 +25,23 @@
           </div>
         </div>
       </div>
-      <!--        <div class="columns is-multiline is-fh">-->
-      <!--          <div class="column is-8">-->
-      <!--            <Player />-->
-      <!--          </div>-->
-      <!--          <div class="column is-4">-->
-      <!--            <Playlist />-->
-      <!--          </div>-->
-      <!--        </div>-->
     </div>
+
+    <Modal
+      :open="usersStore.username == null"
+      title="Set username"
+      :closable="false"
+    >
+      <input class="input" v-model="newUsername" placeholder="Username" />
+      <template v-slot:footer>
+        <button
+          class="button is-primary"
+          @click="usersStore.setUsername(newUsername)"
+        >
+          Save
+        </button>
+      </template>
+    </Modal>
   </section>
 </template>
 
@@ -44,16 +52,21 @@ import Playlist from "@/components/Playlist.vue";
 import { db } from "@/helpers/database";
 import { useRoomStore } from "@/store/room";
 import Navbar from "@/components/Navbar.vue";
-import { onUnmounted } from "vue";
+import { onUnmounted, ref } from "vue";
 import UserList from "@/components/UserList.vue";
+import Modal from "@/components/Modal.vue";
+import { useUsersStore } from "@/store/users";
 
 const props = defineProps<{ id: string }>();
 
 const roomStore = useRoomStore();
+const usersStore = useUsersStore();
 
 roomStore.loadRoom(props.id);
 
 onUnmounted(() => roomStore.leave());
+
+const newUsername = ref<string>(usersStore.username ?? "");
 </script>
 
 <style lang="scss" scoped>

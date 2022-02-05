@@ -10,6 +10,7 @@ import { messageAllowedFromTikTok } from "@/helpers/messaging";
 interface PlayerState {
   playing: boolean;
   loaded: string[];
+  autoplayEnabled: boolean;
 }
 
 export const usePlayerStore = defineStore("player", {
@@ -17,6 +18,7 @@ export const usePlayerStore = defineStore("player", {
     ({
       playing: false,
       loaded: [],
+      autoplayEnabled: false,
     } as PlayerState),
   actions: {
     init() {
@@ -66,6 +68,7 @@ export const usePlayerStore = defineStore("player", {
         .forEach((iframe) => this.setIframePlaying(playing, iframe));
     },
     setPlaying(playing: boolean) {
+      this.autoplayEnabled = true;
       this.gunPlayer.put({ playing });
     },
     unloadVideoId(videoId: string) {
@@ -78,7 +81,10 @@ export const usePlayerStore = defineStore("player", {
       const globalStore = useGlobalStore();
 
       await waitForTrue(
-        () => this.loaded.includes(videoId) && globalStore.hasInteracted
+        () =>
+          this.loaded.includes(videoId) &&
+          globalStore.hasInteracted &&
+          this.autoplayEnabled
       );
 
       const usersStore = useUsersStore();

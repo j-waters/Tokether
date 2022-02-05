@@ -18,6 +18,19 @@ $text-invert: findColorInvert($text);
 $text-light: $grey-lightest;
 $text-strong: $grey-lighter;
 
+$background: $scheme-main-ter;
+
+$modal-background-background-color: bulmaRgba($scheme-main, 0.86);
+$modal-card-body-background-color: $scheme-main-bis;
+
+$input-background-color: $scheme-invert-ter;
+$input-color: $grey-darker;
+$input-icon-color: $grey;
+$input-icon-active-color: $input-color;
+
+$custom-colors: ("secondary": ($purple, findColorInvert($purple)));
+
+
 
 @import "~bulma/sass/utilities/derived-variables";
 
