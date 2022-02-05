@@ -46,7 +46,10 @@ import VideoList from "@/components/VideoList.vue";
 import ToggleButton from "@/components/ToggleButton.vue";
 
 const videos = ref<BasicVideoInfoSourced[]>([]);
-const state = ref<ExtensionState>();
+const state = ref<ExtensionState>({
+  likedScraping: false,
+  messagesScraping: false,
+});
 
 function scrape() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -61,12 +64,9 @@ chrome.runtime.sendMessage(
   }
 );
 
-chrome.runtime.sendMessage(
-  { type: "getState" },
-  (response: ExtensionState[]) => {
-    state.value = response;
-  }
-);
+chrome.runtime.sendMessage({ type: "getState" }, (response: ExtensionState) => {
+  state.value = response;
+});
 
 chrome.runtime.onMessage.addListener((message) => {
   switch (message.type) {

@@ -7,6 +7,9 @@
         }}</a>
       </div>
     </div>
+    <div v-if="filteredVideos.length > 0">
+      {{ filteredVideos.length }} videos
+    </div>
     <div class="buttons" style="width: 100%">
       <button class="button is-flex-grow-1" @click="clear()">Clear</button>
       <button class="button is-flex-grow-1" @click="copy()">Copy</button>

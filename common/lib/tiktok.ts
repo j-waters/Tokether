@@ -1,4 +1,4 @@
-import { http } from "./http";
+import { http, httpJSON } from "./http";
 import { BasicVideoInfo } from "./types";
 
 interface TikTokResponse {
@@ -22,7 +22,7 @@ export interface TikTokVideo extends TikTokResponse {
 }
 
 export async function getVideoInfo(url: string) {
-  const response = await http<TikTokResponse>(
+  const response = await httpJSON<TikTokResponse>(
     `https://www.tiktok.com/oembed?url=${url}`
   );
   return { ...response.parsedBody, videoId: getVideoId(url) };

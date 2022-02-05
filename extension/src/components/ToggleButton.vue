@@ -15,7 +15,7 @@ const props =
   defineProps<{ stateKey: keyof ExtensionState; state: ExtensionState }>();
 
 const emit = defineEmits<{
-  (e: "update:state", value: ExtensionState);
+  (e: "update:state", value: ExtensionState): void;
 }>();
 
 function setState(updateState: Partial<ExtensionState>) {

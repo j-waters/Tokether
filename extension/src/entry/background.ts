@@ -1,7 +1,6 @@
 import {
   getUrlFromId,
   ScrapedVideo,
-  BasicVideoInfo,
   extractBasicInfo,
   BasicVideoInfoSourced,
   ExtensionState,
