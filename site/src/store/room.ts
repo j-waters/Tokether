@@ -61,29 +61,6 @@ export const useRoomStore = defineStore("room", {
     },
     async createRoom() {
       this.roomId = generateId(4);
-      this.addVideos([
-        "https://www.tiktok.com/@hardlyhardin/video/7051714436142255366",
-        "https://www.tiktok.com/@aketton/video/7053481619449040134",
-        "https://www.tiktok.com/@asimpforspidey/video/7050803584744688902",
-        "https://www.tiktok.com/@obabydriver/video/7052865133931990319",
-        "https://www.tiktok.com/@nityasweater/video/7052792237683510533",
-        "https://www.tiktok.com/@swamp_ghoul/video/7053087726479953158",
-        "https://www.tiktok.com/@mhall.22/video/7052738837570751791",
-        "https://www.tiktok.com/@rileslovesyall/video/7052447375910079790",
-        "https://www.tiktok.com/@jack.lawro/video/7052784473284300037",
-        "https://www.tiktok.com/@becauseimmissy_/video/7052747526042111238",
-        "https://www.tiktok.com/@deathpr0cess/video/7052745014476311855",
-        "https://www.tiktok.com/@jamezlaskey/video/7051587577136172293",
-        "https://www.tiktok.com/@hardlyhardin/video/7051713121609649413",
-        "https://www.tiktok.com/@benlapidus/video/7051764182508916014",
-        "https://www.tiktok.com/@futuremilfclub/video/7047313072721022254",
-        "https://www.tiktok.com/@ctrl.alt.mdlt/video/7051785107224694063",
-        "https://www.tiktok.com/@carlygarberlolk/video/7045780237828967727",
-        "https://www.tiktok.com/@mrelectricnick/video/7025423947894148353",
-        "https://www.tiktok.com/@kkirstylouise/video/7050943365084499205",
-        "https://www.tiktok.com/@lenslibrary/video/7043031245722275119",
-        "https://www.tiktok.com/@sadiewooster/video/7050447220239387910",
-      ]);
 
       this.setPlaylistIndex(0);
       await router.push({ name: "Room", params: { id: this.roomId } });
