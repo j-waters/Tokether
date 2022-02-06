@@ -17,6 +17,7 @@ export interface StoredRoomRoot {
 
 export interface StoredUser {
   lastUpdate: string;
+  joinTime: string;
   loaded?: string;
   username: string | null;
   hasExtension: boolean;

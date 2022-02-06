@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useRoomStore } from "@/store/room";
 import { generateId } from "@/helpers/generate";
 import { IGunChainReference } from "gun/types/chain";
-import { differenceInSeconds } from "date-fns";
+import { differenceInSeconds, compareAsc } from "date-fns";
 import { useGlobalStore } from "@/store/global";
 import { StoredUser } from "@/helpers/database";
 
@@ -11,20 +11,16 @@ interface UserState {
   users: User[];
   intervalId?: number;
   username: string | null;
-}
-
-export enum UserStatus {
-  disconnected = 10,
-  good = 4,
-  medium = 6,
-  bad = 8,
+  joinTime: Date | null;
 }
 
 export interface User extends StoredUser {
-  lastUpdateDiff: number;
-  status: UserStatus;
+  connectionStrength: number;
+  isConnected: boolean;
   isCurrent: boolean;
 }
+
+const DISCONNECT_AFTER = 10;
 
 function ingestUser(user: StoredUser): User {
   const usersStore = useUsersStore();
@@ -32,17 +28,11 @@ function ingestUser(user: StoredUser): User {
     new Date(),
     new Date(user.lastUpdate)
   );
+  const connectionStrength = 1 - lastUpdateDiff / DISCONNECT_AFTER;
   return {
     ...user,
-    lastUpdateDiff,
-    status:
-      lastUpdateDiff > UserStatus.disconnected
-        ? UserStatus.disconnected
-        : lastUpdateDiff > UserStatus.bad
-        ? UserStatus.bad
-        : lastUpdateDiff > UserStatus.medium
-        ? UserStatus.medium
-        : UserStatus.good,
+    connectionStrength,
+    isConnected: connectionStrength > 0,
     isCurrent: user.userId == usersStore.userId,
   };
 }
@@ -53,9 +43,11 @@ export const useUsersStore = defineStore("users", {
       userId: generateId(16),
       users: [],
       username: localStorage.getItem("username"),
+      joinTime: null,
     } as UserState),
   actions: {
     init() {
+      this.joinTime = new Date();
       this.intervalId = setInterval(() => this.heartbeat(), 3500);
       this.heartbeat();
 
@@ -63,14 +55,19 @@ export const useUsersStore = defineStore("users", {
 
       this.gunUsers.open!((data) => {
         this.ingestUsers(data);
-        // console.log("Update users", this.activeUsers, this.users);
       });
     },
     ingestUsers(users: Record<string, StoredUser>) {
-      this.users = Object.values(users).map((user) => ingestUser(user));
+      this.users = Object.values(users)
+        .map((user) => ingestUser(user))
+        .sort((a, b) =>
+          a.isCurrent
+            ? -1
+            : compareAsc(new Date(a.joinTime), new Date(b.joinTime))
+        );
     },
     heartbeat() {
-      this.gunUser.put(this.currentBasicUser);
+      this.gunUser.put(this.getCurrentBasicUser());
     },
     setLoaded(itemId: string) {
       this.gunUser.put({ loaded: itemId });
@@ -86,18 +83,17 @@ export const useUsersStore = defineStore("users", {
     },
   },
   getters: {
-    gunUsers(): IGunChainReference {
+    gunUsers(): IGunChainReference<Record<string, StoredUser>, "users", false> {
       const roomStore = useRoomStore();
       return roomStore.gunRoom.get(`users`);
     },
-    gunUser(): IGunChainReference {
+    gunUser(): IGunChainReference<StoredUser, string, false> {
       return this.gunUsers.get(this.userId);
     },
     activeUsers(): User[] {
       return [
-        this.currentUser,
         ...this.users.filter((user) => {
-          return !user.isCurrent && user.status != UserStatus.disconnected;
+          return user.isCurrent || user.isConnected;
         }),
       ];
     },
@@ -107,16 +103,17 @@ export const useUsersStore = defineStore("users", {
         (user) => user.loaded == roomStore.currentItemId
       );
     },
-    currentBasicUser(): StoredUser {
-      return {
+    getCurrentBasicUser(): () => StoredUser {
+      return () => ({
         lastUpdate: new Date().toString(),
         username: this.username,
         hasExtension: useGlobalStore().hasExtension,
         userId: this.userId,
-      };
+        joinTime: this.joinTime!.toString(),
+      });
     },
     currentUser(): User {
-      return ingestUser(this.currentBasicUser);
+      return ingestUser(this.getCurrentBasicUser());
     },
   },
 });
