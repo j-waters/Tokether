@@ -4,23 +4,30 @@
   >
     <div
       class="video-title is-clickable"
-      :class="{ 'has-text-weight-bold': item.isCurrent }"
-      @click="roomStore.setPlaylistIndex(item.index)"
+      :class="{ 'has-text-weight-bold': isCurrent(item) }"
+      @click="roomStore.setPlaylistItem(item.itemId)"
     >
-      <span class="has-text-grey">@{{ item.video.author_name }}</span>
-      {{ item.video.title }}
+      <span class="has-text-grey">@{{ author }}</span>
+      {{ title }}
     </div>
     <button class="button">Cancel</button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { EnhancedPlaylistItem, PlaylistItem, useRoomStore } from "@/store/room";
-import { computed } from "vue";
+import { useRoomStore } from "@/store/room";
+import { isCurrent, PlaylistItem } from "@/store/playlist";
+import { computed, ref, watch } from "vue";
+import { TikTokVideo } from "@tokether/common";
 
 const roomStore = useRoomStore();
 
-const props = defineProps<{ item: EnhancedPlaylistItem }>();
+const props = defineProps<{ item: PlaylistItem }>();
+
+const author = computed(
+  () => props.item.fullInfo?.author_name ?? props.item.author.replace("@", "")
+);
+const title = computed(() => props.item.fullInfo?.title);
 </script>
 
 <style scoped>

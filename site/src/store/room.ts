@@ -1,42 +1,36 @@
 import { defineStore } from "pinia";
-import { getVideoInfo, TikTokVideo } from "@tokether/common";
-import { db } from "@/helpers/database";
+import {
+  BasicVideoInfo,
+  extractBasicInfo,
+  getVideoInfo,
+} from "@tokether/common";
+import {
+  db,
+  StoredPlaylistItem,
+  StoredRoomRoot,
+  StoredRoomState,
+} from "@/helpers/database";
 import router from "@/router";
 import { IGunChainReference } from "gun/types/chain";
 import { usePlayerStore } from "@/store/player";
 import { generateId } from "@/helpers/generate";
 import { useUsersStore } from "@/store/users";
+import { PlaylistItem, usePlaylistStore } from "@/store/playlist";
 
 function isEmpty(obj: any) {
   return Object.keys(obj).length === 0;
 }
 
-export interface PlaylistItem {
-  video: TikTokVideo;
-}
-
-export interface EnhancedPlaylistItem extends PlaylistItem {
-  index: number;
-  isCurrent: boolean;
-  videoId: string;
-  itemId: string;
-}
-
-interface RoomSharedState {
-  playlist: PlaylistItem[];
-  playlistIndex: number;
-}
-
-interface RoomState extends RoomSharedState {
+interface RoomState extends StoredRoomState {
   roomId: string | null;
+  rawPlaylist: Record<string, StoredPlaylistItem>;
 }
 
 export const useRoomStore = defineStore("room", {
   state: () =>
     ({
-      playlist: [] as PlaylistItem[],
       roomId: null,
-      playlistIndex: 0,
+      currentItemId: undefined,
     } as RoomState),
   actions: {
     async leave() {
@@ -44,110 +38,93 @@ export const useRoomStore = defineStore("room", {
       this.$reset();
       usePlayerStore().leave();
       useUsersStore().leave();
+      usePlaylistStore().leave();
     },
-    async addVideos(urls: string[]) {
-      const playlist = this.gunRoomState.get("playlist");
-      for (const url of urls) {
-        if (url == "") continue;
-        const info = await getVideoInfo(url);
-        console.log("add video", url);
-        playlist.set({
-          video: info,
-        } as PlaylistItem);
-      }
+    init() {
+      const playlistStore = usePlaylistStore();
+      const playerStore = usePlayerStore();
+      const usersStore = useUsersStore();
+
+      playlistStore.init();
+      playerStore.init();
+      usersStore.init();
+
+      return { playlistStore, playerStore, usersStore };
     },
-    async addVideo(url: string) {
-      this.addVideos([url]);
-    },
+
     async createRoom() {
       this.roomId = generateId(4);
+      const { playlistStore } = this.init();
 
-      this.setPlaylistIndex(0);
+      playlistStore.addVideos([
+        "https://www.tiktok.com/@ellie.rawlings/video/7057230662700502277",
+        "https://www.tiktok.com/@mitsy270/video/7060712287082089774",
+        "https://www.tiktok.com/@velasquezriley/video/7060991838697721134",
+      ]);
+
+      this.setPlaylistItem(undefined);
+
       await router.push({ name: "Room", params: { id: this.roomId } });
     },
 
-    async setPlaylistIndex(playlistIndex: number) {
-      if (playlistIndex >= this.playlist.length) {
-        playlistIndex = this.playlist.length - 1;
-      }
-      if (playlistIndex < 0) {
-        playlistIndex = 0;
-      }
-      this.gunRoomState.put({ playlistIndex });
+    async setPlaylistItem(itemId: string | undefined) {
+      this.gunRoomState.put({ currentItemId: itemId });
     },
 
-    async nextVideo() {
-      this.setPlaylistIndex(this.playlistIndex + 1);
-    },
-    async prevVideo() {
-      this.setPlaylistIndex(this.playlistIndex - 1);
+    async navigatePlaylist(change: number) {
+      const playlist = usePlaylistStore().playlist;
+      const nextItem = playlist[this.playlistIndex + change];
+      if (nextItem) {
+        this.setPlaylistItem(nextItem.itemId);
+      }
     },
 
-    async ingestState(state: RoomSharedState) {
-      const currentVideoId = this.currentVideo?.videoId;
-      const currentPlaylistIndex = this.playlistIndex;
-      this.playlist = Object.values(state.playlist ?? {});
-      this.playlistIndex = state.playlistIndex;
-      if (
-        this.currentVideo &&
-        (this.currentVideo.videoId != currentVideoId ||
-          this.playlistIndex != currentPlaylistIndex)
-      ) {
+    async setInitialPlaylistItem() {
+      if (this.currentItemId == undefined) {
+        const playlistStore = usePlaylistStore();
+        const firstPlaylistItem = playlistStore.playlist[0];
+        if (firstPlaylistItem) {
+          this.gunRoomState.put({
+            currentItemId: firstPlaylistItem.itemId,
+          });
+        }
+      }
+    },
+
+    async ingestState(state: StoredRoomState) {
+      console.log("ingest state", state);
+      const prevItemId = this.currentItemId;
+      this.currentItemId = state.currentItemId;
+      if (this.currentItemId != prevItemId) {
         const playerStore = usePlayerStore();
-        playerStore.changedVideo(this.currentVideo.videoId);
+        playerStore.changedVideo(this.currentItem);
       }
     },
 
     async loadRoom(roomId: string) {
       this.roomId = roomId;
 
-      const userStore = useUsersStore();
-      userStore.init();
+      this.init();
 
-      this.gunRoomState.load!((state) =>
-        this.ingestState(state as RoomSharedState)
-      );
-
+      this.gunRoomState.load!((state) => this.ingestState(state));
       this.gunRoomState.open!((state) => {
-        this.ingestState(state as RoomSharedState);
+        this.ingestState(state);
       });
     },
   },
   getters: {
-    currentVideo(): TikTokVideo | null {
-      return this.playlist[this.playlistIndex]?.video;
+    currentItem(): PlaylistItem | null {
+      if (this.currentItemId == null) return null;
+      return usePlaylistStore().playlistMap.get(this.currentItemId) ?? null;
     },
-    currentVideoId(): string | null {
-      return this.currentVideo?.videoId ?? null;
+    gunRoom(): IGunChainReference<StoredRoomRoot, string, false> {
+      return db.get("rooms").get(this.roomId!);
     },
-    enhancedPlaylist(): EnhancedPlaylistItem[] {
-      return this.playlist
-        .filter((item) => !isEmpty(item))
-        .map((item, index) => {
-          return {
-            ...item,
-            index,
-            isCurrent: index == this.playlistIndex,
-            videoId: item.video.videoId,
-            itemId: `${index}|${item.video.videoId}`,
-          };
-        });
-    },
-    loadedVideos(): EnhancedPlaylistItem[] {
-      return [
-        this.playlistIndex - 1,
-        this.playlistIndex,
-        this.playlistIndex + 1,
-        this.playlistIndex + 2,
-      ]
-        .map((index) => this.enhancedPlaylist[index])
-        .filter((value) => value && value.videoId);
-    },
-    gunRoom(): IGunChainReference {
-      return db.get(`rooms/${this.roomId}`);
-    },
-    gunRoomState(): IGunChainReference {
+    gunRoomState(): IGunChainReference<StoredRoomState, "state", false> {
       return this.gunRoom.get("state");
+    },
+    playlistIndex(): number {
+      return this.currentItem?.index ?? -1;
     },
   },
 });

@@ -25,27 +25,24 @@
 import { useRoomStore } from "@/store/room";
 import { computed, ref, watch } from "vue";
 import PlaylistRow from "@/components/PlaylistRow.vue";
+import { usePlaylistStore } from "@/store/playlist";
 
 //@keyup.enter="queueVideo()"
-const roomStore = useRoomStore();
+const playlistStore = usePlaylistStore();
 
-const playlist = computed(() => roomStore.enhancedPlaylist, {
-  onTrigger() {
-    console.log("chage playlist");
-  },
-});
+const playlist = computed(() => playlistStore.playlist);
 
 const addingVideoUrl = ref("");
 
 watch(addingVideoUrl, (value) => {
   if (value.includes("\n")) {
-    roomStore.addVideos(value.split("\n"));
+    playlistStore.addVideos(value.split("\n"));
     addingVideoUrl.value = "";
   }
 });
 
 function queueVideo() {
-  roomStore.addVideo(addingVideoUrl.value);
+  playlistStore.addVideo(addingVideoUrl.value);
   addingVideoUrl.value = "";
 }
 </script>

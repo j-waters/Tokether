@@ -4,20 +4,13 @@ import { generateId } from "@/helpers/generate";
 import { IGunChainReference } from "gun/types/chain";
 import { differenceInSeconds } from "date-fns";
 import { useGlobalStore } from "@/store/global";
+import { StoredUser } from "@/helpers/database";
 
 interface UserState {
   userId: string;
   users: User[];
   intervalId?: number;
   username: string | null;
-}
-
-export interface User {
-  lastUpdate: string;
-  loaded?: string;
-  username: string | null;
-  hasExtension: boolean;
-  userId: string;
 }
 
 export enum UserStatus {
@@ -27,13 +20,13 @@ export enum UserStatus {
   bad = 8,
 }
 
-export interface EnhancedUser extends User {
+export interface User extends StoredUser {
   lastUpdateDiff: number;
   status: UserStatus;
   isCurrent: boolean;
 }
 
-function createEnhancedUser(user: User): EnhancedUser {
+function ingestUser(user: StoredUser): User {
   const usersStore = useUsersStore();
   const lastUpdateDiff = differenceInSeconds(
     new Date(),
@@ -70,17 +63,17 @@ export const useUsersStore = defineStore("users", {
 
       this.gunUsers.open!((data) => {
         this.ingestUsers(data);
-        console.log("Update users", this.activeUsers, this.users);
+        // console.log("Update users", this.activeUsers, this.users);
       });
     },
-    ingestUsers(users: Record<string, User>) {
-      this.users = Object.values(users);
+    ingestUsers(users: Record<string, StoredUser>) {
+      this.users = Object.values(users).map((user) => ingestUser(user));
     },
     heartbeat() {
       this.gunUser.put(this.currentBasicUser);
     },
-    setLoaded(videoId: string) {
-      this.gunUser.put({ loaded: videoId });
+    setLoaded(itemId: string) {
+      this.gunUser.put({ loaded: itemId });
     },
     leave() {
       clearInterval(this.intervalId);
@@ -100,23 +93,21 @@ export const useUsersStore = defineStore("users", {
     gunUser(): IGunChainReference {
       return this.gunUsers.get(this.userId);
     },
-    activeUsers(): EnhancedUser[] {
+    activeUsers(): User[] {
       return [
         this.currentUser,
-        ...this.users
-          .map((user) => createEnhancedUser(user))
-          .filter((user) => {
-            return !user.isCurrent && user.status != UserStatus.disconnected;
-          }),
+        ...this.users.filter((user) => {
+          return !user.isCurrent && user.status != UserStatus.disconnected;
+        }),
       ];
     },
     allLoaded(): boolean {
       const roomStore = useRoomStore();
       return this.activeUsers.every(
-        (user) => user.loaded == roomStore.currentVideoId
+        (user) => user.loaded == roomStore.currentItemId
       );
     },
-    currentBasicUser(): User {
+    currentBasicUser(): StoredUser {
       return {
         lastUpdate: new Date().toString(),
         username: this.username,
@@ -124,8 +115,8 @@ export const useUsersStore = defineStore("users", {
         userId: this.userId,
       };
     },
-    currentUser(): EnhancedUser {
-      return createEnhancedUser(this.currentBasicUser);
+    currentUser(): User {
+      return ingestUser(this.currentBasicUser);
     },
   },
 });

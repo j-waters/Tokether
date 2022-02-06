@@ -2,10 +2,10 @@ import { defineStore } from "pinia";
 import { useRoomStore } from "@/store/room";
 import { IGunChainReference } from "gun/types/chain";
 import { useUsersStore } from "@/store/users";
-import { computed, watch } from "vue";
 import { useGlobalStore } from "@/store/global";
 import { waitForTrue } from "@/helpers/watchers";
 import { messageAllowedFromTikTok } from "@/helpers/messaging";
+import { PlaylistItem, usePlaylistStore } from "@/store/playlist";
 
 interface PlayerState {
   playing: boolean;
@@ -74,21 +74,22 @@ export const usePlayerStore = defineStore("player", {
     unloadVideoId(videoId: string) {
       this.loaded = this.loaded.filter((l) => l != videoId);
     },
-    async changedVideo(videoId: string) {
-      console.log("changed video");
+    async changedVideo(currentItem: PlaylistItem | null) {
       this.setAllIframesPlaying(false);
+
+      if (currentItem == null) return;
 
       const globalStore = useGlobalStore();
 
       await waitForTrue(
         () =>
-          this.loaded.includes(videoId) &&
+          this.loaded.includes(currentItem.videoId) &&
           globalStore.hasInteracted &&
           this.autoplayEnabled
       );
 
       const usersStore = useUsersStore();
-      usersStore.setLoaded(videoId);
+      usersStore.setLoaded(currentItem.itemId);
 
       await waitForTrue(() => usersStore.allLoaded);
 
@@ -99,6 +100,19 @@ export const usePlayerStore = defineStore("player", {
     gunPlayer(): IGunChainReference {
       const roomStore = useRoomStore();
       return roomStore.gunRoom.get("player");
+    },
+    loadedVideos(): PlaylistItem[] {
+      const playlistStore = usePlaylistStore();
+      const playlistIndex = useRoomStore().playlistIndex;
+      const loaded = [
+        playlistIndex - 1,
+        playlistIndex,
+        playlistIndex + 1,
+        playlistIndex + 2,
+      ]
+        .map((index) => playlistStore.playlist[index])
+        .filter((value) => value && value.url);
+      return loaded;
     },
   },
 });
