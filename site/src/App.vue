@@ -13,8 +13,4 @@ globalStore.init();
 html {
   overflow-y: auto;
 }
-
-body {
-  //background-color: black;
-}
 </style>
