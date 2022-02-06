@@ -54,13 +54,13 @@ export const useRoomStore = defineStore("room", {
 
     async createRoom() {
       this.roomId = generateId(4);
-      const { playlistStore } = this.init();
-
-      playlistStore.addVideos([
-        "https://www.tiktok.com/@ellie.rawlings/video/7057230662700502277",
-        "https://www.tiktok.com/@mitsy270/video/7060712287082089774",
-        "https://www.tiktok.com/@velasquezriley/video/7060991838697721134",
-      ]);
+      // const { playlistStore } = this.init();
+      //
+      // playlistStore.addVideos([
+      //   "https://www.tiktok.com/@ellie.rawlings/video/7057230662700502277",
+      //   "https://www.tiktok.com/@mitsy270/video/7060712287082089774",
+      //   "https://www.tiktok.com/@velasquezriley/video/7060991838697721134",
+      // ]);
 
       this.setPlaylistItem(undefined);
 

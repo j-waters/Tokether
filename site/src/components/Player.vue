@@ -5,6 +5,7 @@
       :video-id="item.videoId"
       :key="item.itemId"
       v-show="isCurrent(item)"
+      class="h-100"
       :class="{ 'current-iframe': isCurrent(item) }"
     />
     <div class="buttons" style="width: 100%">
@@ -36,4 +37,8 @@ const roomStore = useRoomStore();
 const playerStore = usePlayerStore();
 </script>
 
-<style scoped></style>
+<style scoped>
+.h-100 {
+  height: 100%;
+}
+</style>
