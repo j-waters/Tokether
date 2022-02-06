@@ -18,10 +18,11 @@
 </template>
 
 <script lang="ts" setup>
-import { BasicVideoInfo, VideoSource } from "@tokether/common";
+import {BasicVideoInfo, ScrapedVideoUrl, VideoSource} from "@tokether/common";
 import { computed } from "vue";
+import {useState} from "@/helpers/useState";
 
-const props = defineProps<{ videos: BasicVideoInfo[]; source: VideoSource }>();
+const props = defineProps<{ videos: ScrapedVideoUrl[]; source: VideoSource }>();
 
 const filteredVideos = computed(() =>
   props.videos.filter((v) => v.source === props.source)
@@ -37,8 +38,10 @@ function copy() {
   );
 }
 
+const {asyncState} = useState()
+
 function clear() {
-  chrome.runtime.sendMessage({ type: "clear", source: props.source });
+  asyncState.filterVideos(video => video.source != props.source)
 }
 </script>
 

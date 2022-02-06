@@ -3,53 +3,29 @@ import {
   ScrapedVideo,
   ScrapedVideoUrl,
 } from "@tokether/common";
+import {DEFAULT_STATE} from "@tokether/common/lib/types";
+import state from "@/helpers/state";
+import {distinctUntilKeyChanged} from "rxjs/operators";
+import {ingestVideos} from "@/helpers/ingestVideos";
 
 console.log("tiktok mode");
 
-const state: ExtensionState = {
-  messagesScraping: false,
-  likedScraping: false,
-};
+async function scrape() {
+    if (await state.likedScraping) {
+        const videos = [...document.querySelectorAll("a")]
+            .map((link): ScrapedVideoUrl => ({ url: link.href, source: "liked" }))
+            .filter((l) => l.url.match(/https:\/\/www\.tiktok\.com\/.+\/video\/\d+/));
 
-function getAllVideos(): ScrapedVideoUrl[] {
-  const links = [...document.querySelectorAll("a")]
-    .map((link): ScrapedVideoUrl => ({ url: link.href, source: "liked" }))
-    .filter((l) => l.url.match(/https:\/\/www\.tiktok\.com\/.+\/video\/\d+/));
-  return links;
+        await ingestVideos(videos)
+    }
 }
-
-function sendToBackend(videos: ScrapedVideo[]) {
-  chrome.runtime.sendMessage({ type: "sendVideos", videos });
-}
-
-function scrape() {
-  sendToBackend(getAllVideos());
-}
-
-chrome.runtime.sendMessage(
-  { type: "getState" },
-  (response: ExtensionState[]) => {
-    Object.assign(state, response);
-  }
-);
 
 document.addEventListener("scroll", () => {
-  if (state.likedScraping) {
-    scrape();
-  }
+    scrape()
 });
 
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  switch (message.type) {
-    case "scrape":
-      scrape();
-      break;
-    case "setState":
-      Object.assign(state, message);
-      sendResponse(state);
-      if (state.likedScraping) {
-        scrape();
-      }
-      break;
-  }
-});
+state.valueStream.pipe(distinctUntilKeyChanged("likedScraping")).subscribe(() => {
+    scrape()
+})
+
+scrape()

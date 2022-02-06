@@ -15,7 +15,7 @@
           scroll down to load videos
         </div>
         <div class="">
-          <ToggleButton state-key="likedScraping" v-model:state="state" />
+          <ToggleButton state-key="likedScraping" />
         </div>
       </div>
       <VideoList :videos="videos" source="liked" />
@@ -30,7 +30,7 @@
           then open a chat. Scroll through the chat to load videos
         </div>
         <div class="">
-          <ToggleButton state-key="messagesScraping" v-model:state="state" />
+          <ToggleButton state-key="messagesScraping" />
         </div>
       </div>
       <VideoList :videos="videos" source="messages" />
@@ -39,42 +39,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import { BasicVideoInfo, ExtensionState } from "@tokether/common";
 import { BasicVideoInfoSourced } from "@tokether/common/lib/types";
 import VideoList from "@/components/VideoList.vue";
 import ToggleButton from "@/components/ToggleButton.vue";
+import {useState} from "@/helpers/useState";
 
-const videos = ref<BasicVideoInfoSourced[]>([]);
-const state = ref<ExtensionState>({
-  likedScraping: false,
-  messagesScraping: false,
-});
+const {state} = useState()
+
+
+const videos = computed(() => state.value?.videos ?? [])
 
 function scrape() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     chrome.tabs.sendMessage(tabs[0].id!, { type: "scrape" });
   });
 }
-
-chrome.runtime.sendMessage(
-  { type: "getVideos" },
-  (response: BasicVideoInfo[]) => {
-    videos.value = response;
-  }
-);
-
-chrome.runtime.sendMessage({ type: "getState" }, (response: ExtensionState) => {
-  state.value = response;
-});
-
-chrome.runtime.onMessage.addListener((message) => {
-  switch (message.type) {
-    case "updateVideos":
-      videos.value = message.videos;
-      break;
-  }
-});
 
 function openMessagesPage() {
   chrome.tabs.create({ url: "https://www.tiktok.com/messages?lang=en" });

@@ -1,14 +1,18 @@
 interface HttpResponse<T> extends Response {
   parsedBody?: T;
 }
-export async function http<T>(request: RequestInfo): Promise<Response> {
-  return await fetch(request);
+export async function http<T>(
+  request: RequestInfo,
+  options?: RequestInit
+): Promise<Response> {
+  return await fetch(request, options);
 }
 
 export async function httpJSON<T>(
-  request: RequestInfo
+  request: RequestInfo,
+  options?: RequestInit
 ): Promise<HttpResponse<T>> {
-  const response: HttpResponse<T> = await fetch(request);
+  const response: HttpResponse<T> = await fetch(request, options);
   response.parsedBody = await response
     .clone()
     .json()

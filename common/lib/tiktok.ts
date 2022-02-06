@@ -21,11 +21,11 @@ export interface TikTokVideo extends TikTokResponse {
   videoId: string;
 }
 
-export async function getVideoInfo(url: string) {
+export async function getVideoInfo(url: string): Promise<TikTokVideo> {
   const response = await httpJSON<TikTokResponse>(
     `https://www.tiktok.com/oembed?url=${url}`
   );
-  return { ...response.parsedBody, videoId: getVideoId(url) };
+  return { ...response.parsedBody!, videoId: getVideoId(url) };
 }
 
 export function getVideoId(url: string) {
@@ -34,7 +34,6 @@ export function getVideoId(url: string) {
 
 export function getVideoAuthor(url: string) {
   const regex = new RegExp(`/(@[a-zA-z0-9_.]+)/video/\\d+`);
-  console.log("getting author", url, url.match(regex));
   return url.match(regex)![1];
 }
 

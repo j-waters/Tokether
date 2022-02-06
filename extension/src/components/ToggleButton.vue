@@ -1,8 +1,8 @@
 <template>
   <button
     class="button"
-    :class="{ 'is-success': state[stateKey] }"
-    @click="setState({ [stateKey]: !state[stateKey] })"
+    :class="{ 'is-success': value }"
+    @click="toggle()"
   >
     {{ state[stateKey] ? "On" : "Off" }}
   </button>
@@ -10,22 +10,18 @@
 
 <script lang="ts" setup>
 import { ExtensionState } from "@tokether/common";
+import {useState} from "@/helpers/useState";
+import {computed} from "vue";
+
+const {state, asyncState} = useState()
+
+const value = computed(() => state.value[props.stateKey])
 
 const props =
-  defineProps<{ stateKey: keyof ExtensionState; state: ExtensionState }>();
+  defineProps<{ stateKey: keyof ExtensionState }>();
 
-const emit = defineEmits<{
-  (e: "update:state", value: ExtensionState): void;
-}>();
-
-function setState(updateState: Partial<ExtensionState>) {
-  chrome.runtime.sendMessage(
-    {
-      type: "setState",
-      ...updateState,
-    },
-    (newState) => emit("update:state", newState)
-  );
+function toggle() {
+  asyncState.set({[props.stateKey]: !value.value})
 }
 </script>
 
