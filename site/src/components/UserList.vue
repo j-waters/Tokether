@@ -9,12 +9,12 @@
         <span class="icon" v-if="user.isCurrent">
           <i class="fas fa-user"></i>
         </span>
-        <span class="icon" v-if="user.connectionStrength < 0.5">
+        <span class="icon" v-if="user.connectionStatus !== 'good'">
           <span
             class="signal"
             :class="{
-              'has-text-warning': user.connectionStrength > 0,
-              'has-text-danger': user.connectionStrength <= 0,
+              'has-text-warning': user.connectionStatus === 'poor',
+              'has-text-danger': user.connectionStatus !== 'poor',
             }"
           >
             <span />

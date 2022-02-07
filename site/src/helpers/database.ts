@@ -12,7 +12,7 @@ export interface StoredRoomRoot {
   state: StoredRoomState;
   playlist: Record<string, StoredPlaylistItem>;
   player: StoredPlayerState;
-  users: Record<string, StoredUser>;
+  users: Record<string, StoredUser | null>;
 }
 
 export interface StoredUser {
