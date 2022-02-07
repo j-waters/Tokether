@@ -1,6 +1,6 @@
 <template>
   <div
-    class="playlist-row is-flex is-gap-1 is-align-items-center is-justify-content-space-between is-clickable"
+    class="playlist-row is-flex is-gap-1 is-align-items-center is-justify-content-space-between is-clickable px-2"
   >
     <div class="thumbnail">
       <img :src="item.fullInfo.thumbnail_url" />
@@ -75,6 +75,7 @@ const title = computed(() => props.item.fullInfo?.title);
     transition: width $hover-transition-duration;
     opacity: 1;
     width: 200px;
+    z-index: 15;
   }
 
   img {
