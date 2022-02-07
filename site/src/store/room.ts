@@ -33,7 +33,7 @@ export const useRoomStore = defineStore("room", {
       currentItemId: undefined,
     } as RoomState),
   actions: {
-    async leave() {
+    leave() {
       this.gunRoom.off();
       this.$reset();
       usePlayerStore().leave();
@@ -67,19 +67,22 @@ export const useRoomStore = defineStore("room", {
       await router.push({ name: "Room", params: { id: this.roomId } });
     },
 
-    async setPlaylistItem(itemId: string | undefined) {
+    setPlaylistItem(itemId: string | undefined) {
       this.gunRoomState.put({ currentItemId: itemId });
     },
 
-    async navigatePlaylist(change: number) {
+    navigatePlaylist(change: number) {
       const playlist = usePlaylistStore().playlist;
       const nextItem = playlist[this.playlistIndex + change];
       if (nextItem) {
         this.setPlaylistItem(nextItem.itemId);
+        return true;
+      } else {
+        return false;
       }
     },
 
-    async setInitialPlaylistItem() {
+    setInitialPlaylistItem() {
       if (this.currentItemId == undefined) {
         const playlistStore = usePlaylistStore();
         const firstPlaylistItem = playlistStore.playlist[0];
@@ -91,7 +94,7 @@ export const useRoomStore = defineStore("room", {
       }
     },
 
-    async ingestState(state: StoredRoomState) {
+    ingestState(state: StoredRoomState) {
       console.log("ingest state", state);
       const prevItemId = this.currentItemId;
       this.currentItemId = state.currentItemId;
@@ -101,7 +104,7 @@ export const useRoomStore = defineStore("room", {
       }
     },
 
-    async loadRoom(roomId: string) {
+    loadRoom(roomId: string) {
       this.roomId = roomId;
 
       this.init();

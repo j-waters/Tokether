@@ -29,9 +29,12 @@ export const usePlaylistStore = defineStore("playlist", {
       this.gunPlaylist.load!(this.ingestPlaylist);
       this.gunPlaylist.open!(this.ingestPlaylist);
     },
-    ingestPlaylist(storedPlaylist: Record<string, StoredPlaylistItem>) {
+    ingestPlaylist(storedPlaylist: Record<string, StoredPlaylistItem | null>) {
       this.playlist = Object.entries(storedPlaylist)
-        .filter(([, item]) => item.url)
+        .filter((value): value is [string, StoredPlaylistItem] => {
+          const item = value[1];
+          return item != null && item.url != undefined;
+        })
         .map(([itemId, item], index) => ({
           ...item,
           ...extractBasicInfo(item.url),
@@ -58,13 +61,22 @@ export const usePlaylistStore = defineStore("playlist", {
       };
       this.gunPlaylist.set(playlistItem);
     },
+    async removeItem(itemId: string) {
+      const roomStore = useRoomStore();
+      if (roomStore.currentItemId == itemId) {
+        let couldNavigate = roomStore.navigatePlaylist(1);
+        if (!couldNavigate) couldNavigate = roomStore.navigatePlaylist(-1);
+        if (!couldNavigate) roomStore.setPlaylistItem(undefined);
+      }
+      this.gunPlaylist.put({ [itemId]: null });
+    },
   },
   getters: {
     playlistMap(): Map<string, PlaylistItem> {
       return new Map(this.playlist.map((item) => [item.itemId, item]));
     },
     gunPlaylist(): IGunChainReference<
-      Record<string, StoredPlaylistItem>,
+      Record<string, StoredPlaylistItem | null>,
       "playlist",
       false
     > {

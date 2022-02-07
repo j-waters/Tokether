@@ -14,7 +14,7 @@ interface StoredAppState {
 
 export interface StoredRoomRoot {
   state: StoredRoomState;
-  playlist: Record<string, StoredPlaylistItem>;
+  playlist: Record<string, StoredPlaylistItem | null>;
   player: StoredPlayerState;
   users: Record<string, StoredUser | null>;
 }
