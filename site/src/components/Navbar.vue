@@ -5,7 +5,7 @@
         <a class="navbar-item">
           <router-link
             to="/"
-            class="title is-1 glitch-text is-slow"
+            class="title is-3 glitch-text is-slow"
             data-text="Tokether"
           >
             Tokether

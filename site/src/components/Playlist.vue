@@ -1,6 +1,6 @@
 <template>
-  <div class="is-flex is-flex-direction-column is-fh">
-    <div class="is-flex-grow-1" style="overflow: auto">
+  <div class="is-flex is-flex-direction-column h-100">
+    <div class="is-flex-grow-1 playlist-list" style="overflow: auto">
       <PlaylistRow v-for="item in playlist" :key="item.itemId" :item="item" />
     </div>
     <p class="help has-text-left mt-5 mb-1">
@@ -50,9 +50,27 @@ function queueVideo() {
 <style lang="scss" scoped>
 //max-height: calc(100vh - 1.5rem - 52px - 3rem);
 //overflow-y: auto;
+@import "~@/colours";
+@import "~bulma/sass/utilities/mixins.sass";
+
 textarea {
   overflow: hidden;
   resize: none;
   white-space: pre;
+}
+
+.playlist-list div {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  &:nth-child(even) {
+    background-color: lighten($box-background-color, 2%);
+    &:hover {
+      background-color: lighten($box-background-color, 4%);
+    }
+  }
+
+  &:hover {
+    background-color: lighten($box-background-color, 2%);
+  }
 }
 </style>

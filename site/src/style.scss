@@ -13,8 +13,13 @@ $tooltip-background-opacity: 1;
   width: fit-content;
 }
 
-.is-fh {
+.h-100 {
   height: 100%;
+}
+
+.fh-column {
+  height: calc(
+          100vh - #{nth($hero-body-padding, 1) * 2 + $navbar-height});
 }
 
 

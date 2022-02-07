@@ -6,14 +6,20 @@
     </div>
 
     <!-- Hero content: will be in the middle -->
-    <div class="hero-body is-align-items-stretch" style="overflow: hidden">
-      <div class="tile is-ancestor is-fh">
-        <div class="tile is-parent">
-          <div class="tile is-child box">
-            <Player />
+    <div class="hero-body is-align-items-stretch">
+      <div class="tile is-ancestor h-100">
+        <div class="tile is-parent fh-column">
+          <div class="tile is-child box h-100">
+            <Player v-if="playlistNotEmpty" />
+            <div
+              class="title is-5 is-flex is-justify-content-center is-align-items-center h-100"
+              v-else
+            >
+              Add a video to the playlist to start watching!
+            </div>
           </div>
         </div>
-        <div class="tile is-4 is-vertical is-parent">
+        <div class="tile is-4 is-vertical is-parent fh-column">
           <div class="tile is-child box">
             <UserList />
           </div>
@@ -52,21 +58,25 @@ import Playlist from "@/components/Playlist.vue";
 import { db } from "@/helpers/database";
 import { useRoomStore } from "@/store/room";
 import Navbar from "@/components/Navbar.vue";
-import { onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import UserList from "@/components/UserList.vue";
 import Modal from "@/components/Modal.vue";
 import { useUsersStore } from "@/store/users";
+import { usePlaylistStore } from "@/store/playlist";
 
 const props = defineProps<{ id: string }>();
 
 const roomStore = useRoomStore();
 const usersStore = useUsersStore();
+const playlistStore = usePlaylistStore();
 
 roomStore.loadRoom(props.id);
 
 onUnmounted(() => roomStore.leave());
 
 const newUsername = ref<string>(usersStore.username ?? "");
+
+const playlistNotEmpty = computed(() => playlistStore.playlist.length > 0);
 </script>
 
 <style lang="scss" scoped>

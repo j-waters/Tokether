@@ -1,11 +1,13 @@
 <template>
-  <div class="is-flex is-flex-direction-column is-align-items-center is-fh">
+  <div
+    class="h-100 player is-flex is-flex-direction-column is-align-items-center"
+  >
     <TikTok
       v-for="item in playerStore.loadedVideos"
       :video-id="item.videoId"
       :key="item.itemId"
       v-show="isCurrent(item)"
-      class="h-100"
+      style="overflow: hidden"
       :class="{ 'current-iframe': isCurrent(item) }"
     />
     <div class="buttons" style="width: 100%">
@@ -37,8 +39,4 @@ const roomStore = useRoomStore();
 const playerStore = usePlayerStore();
 </script>
 
-<style scoped>
-.h-100 {
-  height: 100%;
-}
-</style>
+<style lang="scss" scoped></style>
