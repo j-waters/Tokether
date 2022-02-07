@@ -15,7 +15,7 @@
   "permissions": ["webRequest", "storage"],
   "host_permissions": ["*://*.tiktok.com/*"],
   "externally_connectable": {
-    "matches": ["*://localhost/*"]
+    "matches": ["*://localhost/*", "https://tokether.jamescwaters.com/*"]
   },
   "content_scripts": [
     {
