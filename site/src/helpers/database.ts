@@ -2,6 +2,10 @@ import Gun from "gun";
 import "gun/sea";
 import "gun/lib/open";
 import "gun/lib/load";
+import "gun/lib/radix";
+import "gun/lib/radisk";
+import "gun/lib/store";
+import "gun/lib/rindexed";
 import { TikTokVideo } from "@tokether/common";
 
 interface StoredAppState {
@@ -39,6 +43,8 @@ export interface StoredPlaylistItem {
 
 export const db = Gun<StoredAppState>({
   peers: ["https://tokether-relay.herokuapp.com/gun"],
+  localStorage: false,
+  radisk: true,
 });
 
 db.open!((data) => console.log("Update data:", data));
