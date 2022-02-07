@@ -54,16 +54,19 @@ function ingestUser(user: StoredUser): User {
 }
 
 export const useUsersStore = defineStore("users", {
-  state: () =>
-    ({
-      userId: generateId(16),
+  state: () => {
+    const userId = localStorage.getItem("userId") || generateId(16);
+    localStorage.setItem("userId", userId);
+    return {
+      userId,
       rawUsers: {},
       users: [],
       username: localStorage.getItem("username"),
       joinTime: null,
       lastSentUpdate: null,
       hasConnected: false,
-    } as UserState),
+    } as UserState;
+  },
   actions: {
     init() {
       this.joinTime = new Date();
