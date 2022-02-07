@@ -6,7 +6,11 @@
       class="tag is-info is-large is-secondary is-rounded"
     >
       <span class="icon-text">
-        <span class="icon" v-if="user.isCurrent">
+        <span
+          class="icon has-tooltip-arrow has-tooltip-bottom"
+          v-if="user.isCurrent"
+          data-tooltip="This is you!"
+        >
           <i class="fas fa-user"></i>
         </span>
         <span class="icon" v-if="user.connectionStatus !== 'good'">
@@ -22,7 +26,11 @@
             <span />
           </span>
         </span>
-        <span v-if="!user.hasExtension" class="icon has-text-danger-dark">
+        <span
+          v-if="!user.hasExtension"
+          class="icon has-text-danger-dark has-tooltip-arrow has-tooltip-multiline has-tooltip-bottom"
+          data-tooltip="This user doesn't have the Tokether extension - autoplay will be disabled for everyone"
+        >
           <i class="fas fa-puzzle-piece"></i>
         </span>
         <span>{{ user.username }}</span>
@@ -32,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { UserStatus, useUsersStore } from "@/store/users";
+import { useUsersStore } from "@/store/users";
 import { computed } from "vue";
 
 const usersStore = useUsersStore();
@@ -68,5 +76,9 @@ const users = computed(() => usersStore.activeUsers);
 
 .icon-text .icon:not(:first-child) {
   margin-left: 0;
+}
+
+[data-tooltip] {
+  border-bottom: none;
 }
 </style>
